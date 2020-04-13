@@ -147,3 +147,24 @@ def test_query_with_startindex(config_ArcGIS_ESRIJSON):
     assert '1364' in properties['fulladdr']
     geometry = feature.get('geometry', None)
     assert geometry is not None
+
+
+def test_query_with_property_filtering(config_ArcGIS_ESRIJSON):
+    """Testing query with property filtering"""
+
+    p = OGRProvider(config_ArcGIS_ESRIJSON)
+    full_addr = '3000 E Warrenville Rd'
+    feature_collection = p.query(
+        properties=[
+            ('fulladdr', full_addr),
+        ]
+    )
+    features = feature_collection.get('features', None)
+
+    assert len(features) == 1
+
+    for feature in features:
+        assert 'properties' in feature
+        assert 'fulladdr' in feature['properties']
+        assert feature['properties']['fulladdr'] == full_addr
+        assert feature['properties']['municipality'] == 'Lisle'
